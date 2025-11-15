@@ -9,9 +9,6 @@ import { ErrorCode, ErrorMap } from '../exceptions/error-codes';
 import { ApiResponseDto } from 'src/modules/common/dtos/app-response.dto';
 import { StatusCodes } from 'src/lib/enums/status-code';
 
-/**
- * Interface cho kết quả xử lý lỗi nội bộ
- */
 interface IErrorResponse {
     payload: ApiResponseDto<null>;
     status: number;
@@ -19,10 +16,6 @@ interface IErrorResponse {
 
 @Catch()
 export class AppExceptionFilter implements ExceptionFilter {
-    /**
-     * Phương thức CATCH chính
-     * Vai trò: Chỉ điều phối, lấy context và gửi response.
-     */
     catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response: any = ctx.getResponse();
@@ -36,12 +29,9 @@ export class AppExceptionFilter implements ExceptionFilter {
     }
 
     // -------------------------------------------------------------------
-    // CÁC HELPER METHOD (PRIVATE)
+    // Helper methods (private)
     // -------------------------------------------------------------------
 
-    /**
-     * "Bộ định tuyến" lỗi, quyết định hàm build nào sẽ được gọi.
-     */
     private buildErrorResponse(exception: unknown): IErrorResponse {
         if (exception instanceof AppException) {
             return this.buildAppExceptionResponse(exception);
@@ -55,9 +45,6 @@ export class AppExceptionFilter implements ExceptionFilter {
         return this.buildUnknownErrorResponse(exception);
     }
 
-    /**
-     * Xử lý lỗi 1: Custom AppException
-     */
     private buildAppExceptionResponse(exception: AppException): IErrorResponse {
         const status = exception.getStatus();
         const resp = exception.getResponse() as any;
@@ -77,9 +64,6 @@ export class AppExceptionFilter implements ExceptionFilter {
         return { payload, status };
     }
 
-    /**
-     * Xử lý lỗi 2: HttpException (chung hoặc Validation)
-     */
     private buildHttpExceptionResponse(
         exception: HttpException
     ): IErrorResponse {
@@ -119,9 +103,6 @@ export class AppExceptionFilter implements ExceptionFilter {
         return { payload, status };
     }
 
-    /**
-     * Xử lý lỗi 3: Lỗi 500 chung (Unknown/Error)
-     */
     private buildUnknownErrorResponse(exception: unknown): IErrorResponse {
         const status = StatusCodes.INTERNAL_SERVER_ERROR;
         const code = ErrorCode.INTERNAL_SERVER_ERROR;
@@ -145,9 +126,6 @@ export class AppExceptionFilter implements ExceptionFilter {
         return { payload, status };
     }
 
-    /**
-     * Helper kiểm tra xem đây có phải là lỗi Validation không
-     */
     private isValidationError(status: number, resp: string | object): boolean {
         const validationMessages =
             (resp as any)?.message || (resp as any)?.errors;
@@ -159,9 +137,6 @@ export class AppExceptionFilter implements ExceptionFilter {
         );
     }
 
-    /**
-     * Helper chỉ để build lỗi Validation (tách ra từ buildHttpExceptionResponse)
-     */
     private buildValidationResponse(resp: any): IErrorResponse {
         const status = StatusCodes.BAD_REQUEST;
         const validationMessages = resp?.message || resp?.errors;
@@ -181,9 +156,6 @@ export class AppExceptionFilter implements ExceptionFilter {
         return { payload, status };
     }
 
-    /**
-     * Helper để gửi response (Hỗ trợ cả Express và Fastify)
-     */
     private sendResponse(
         response: any,
         status: number,

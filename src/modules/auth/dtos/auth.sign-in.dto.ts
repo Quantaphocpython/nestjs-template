@@ -7,7 +7,9 @@ import {
     IsString,
     MaxLength,
     MinLength,
+    Matches,
 } from 'class-validator';
+import { PASSWORD_REGEX } from 'src/lib/constants';
 
 export class AuthSignInDto {
     @ApiProperty({
@@ -29,6 +31,10 @@ export class AuthSignInDto {
     @IsNotEmpty()
     @MinLength(8)
     @MaxLength(16)
+    @Matches(PASSWORD_REGEX, {
+        message:
+            'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    })
     password!: string;
 
     @ApiProperty({

@@ -1,6 +1,7 @@
 export enum ErrorCode {
     // Auth module (100s)
     UNAUTHORIZED = 101,
+    INVALID_CREDENTIALS = 102,
 
     // Users module (200s)
     USER_NOT_FOUND = 200,
@@ -23,6 +24,10 @@ export const ErrorMap: Record<ErrorCode, ErrorMeta> = {
     [ErrorCode.UNAUTHORIZED]: {
         statusCode: StatusCodes.UNAUTHORIZED,
         message: 'Unauthorized',
+    },
+    [ErrorCode.INVALID_CREDENTIALS]: {
+        statusCode: StatusCodes.UNAUTHORIZED,
+        message: 'Invalid credentials',
     },
     [ErrorCode.USER_NOT_FOUND]: {
         statusCode: StatusCodes.NOT_FOUND,

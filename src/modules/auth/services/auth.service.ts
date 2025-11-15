@@ -67,7 +67,7 @@ export class AuthService {
         );
 
         if (!isPasswordValid) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         const expiresIn = rememberMe

@@ -1,0 +1,130 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String            @id @default(uuid()) @db.Uuid
+  name              String?
+  email             String            @unique
+  emailVerified     Boolean?          @default(false)
+  image             String?
+  password          String?
+  phone             String?           @unique
+  birthday          DateTime?
+  role              UserRole          @default(User)
+  createdAt         DateTime          @default(now()) @db.Timestamptz(0)
+  updatedAt         DateTime          @updatedAt @db.Timestamptz(0)
+  createdBy        String?           @db.Uuid
+  updatedBy        String?           @db.Uuid
+  address          String?            @unique
+  isBlocked        Boolean            @default(false)
+  deletedAt        DateTime?          @db.Timestamptz(0)
+
+
+  authentication   UserAuthentication?
+  dailyCheckIns    DailyCheckIn[]
+  openedBoxes      UserOpenedBox[]
+  chatParticipants ChatParticipant[]
+  chatMessages     ChatMessage[]
+}
+
+model UserAuthentication {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @unique @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  createdAt         DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(0)
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model DailyCheckIn {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  checkInDate  DateTime @db.Date
+  createdAt    DateTime @default(now()) @db.Timestamptz(0)
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, checkInDate])
+  @@index([userId])
+}
+
+model LootBox {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  imageUrl    String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(0)
+  createdBy  String?   @db.Uuid 
+  updatedBy  String?   @db.Uuid
+  openedBy    UserOpenedBox[]
+}
+
+model UserOpenedBox {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  lootBoxId String   @db.Uuid
+  openedAt  DateTime @default(now()) @db.Timestamptz(0)
+  reward    String
+
+  user    User    @relation(fields: [userId], references: [id])
+  lootBox LootBox @relation(fields: [lootBoxId], references: [id])
+
+  @@index([userId])
+  @@index([lootBoxId])
+}
+
+model ChatRoom {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String?
+  createdAt    DateTime @default(now()) @db.Timestamptz(0)
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+}
+
+model ChatParticipant {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  roomId    String   @db.Uuid
+  joinedAt  DateTime @default(now())
+
+  user User     @relation(fields: [userId], references: [id])
+  room ChatRoom @relation(fields: [roomId], references: [id])
+
+  @@unique([userId, roomId])
+  @@index([userId])
+  @@index([roomId])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+
+  authorId  String   @db.Uuid
+  roomId    String   @db.Uuid
+
+  author User     @relation(fields: [authorId], references: [id])
+  room   ChatRoom @relation(fields: [roomId], references: [id])
+
+  @@index([authorId])
+  @@index([roomId])
+}
+
+enum UserRole {
+  Admin
+  User
+}

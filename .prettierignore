@@ -1,0 +1,15 @@
+# Dependencies and build outputs
+node_modules/
+dist/
+coverage/
+
+# Prisma generated client
+prisma/generated/
+prisma/generated/prisma/
+
+# Other generated or vendor code
+**/prismaGenerated/
+
+# Logs
+*.log
+

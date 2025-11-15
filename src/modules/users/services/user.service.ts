@@ -1,4 +1,6 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { AppException } from 'src/exceptions/app-exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 import { User } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { CreateUserDto, UserResponseDto } from '../dtos';
@@ -13,7 +15,7 @@ export class UserService {
     async createUser(dto: CreateUserDto): Promise<UserResponseDto> {
         const userFound = await this.users.findByEmail(dto.email);
         if (userFound) {
-            throw new ConflictException('User already exists with this email');
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
         const user = await this.users.create({

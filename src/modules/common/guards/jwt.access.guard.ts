@@ -6,6 +6,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { PUBLIC_ROUTE_KEY } from 'src/lib/constants';
+import { AppException } from 'src/exceptions/app-exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 
 @Injectable()
 export class AuthJwtAccessGuard extends AuthGuard('jwt-access') {
@@ -43,9 +45,7 @@ export class AuthJwtAccessGuard extends AuthGuard('jwt-access') {
         }
 
         if (err || !user) {
-            throw new UnauthorizedException(
-                'Access token is invalid or expired'
-            );
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         // This would attach to the request object as req.user

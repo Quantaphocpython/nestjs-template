@@ -7,6 +7,7 @@ import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { ResponseInterceptor } from './filters/global-response.filter';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { AppExceptionFilter } from './filters/app-exception.filter';
 import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 import { Prefix } from './lib/constants';
 
@@ -49,7 +50,8 @@ export const bootstrap = (
 
     // Exception filters for different types of errors
     app.useGlobalFilters(new PrismaExceptionFilter());
-    app.useGlobalFilters(new HttpExceptionFilter());
+    // Use our unified AppExceptionFilter to normalize all exceptions (validation, AppException, generic)
+    app.useGlobalFilters(new AppExceptionFilter());
     app.useGlobalInterceptors(new ResponseInterceptor());
 
     // Cookie parser middleware

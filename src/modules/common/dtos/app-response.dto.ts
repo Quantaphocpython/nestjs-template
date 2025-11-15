@@ -3,6 +3,8 @@ import { Type } from 'class-transformer';
 import { PaginationMetaDto } from './paginate.dto';
 
 export abstract class ApiBaseResponseDto {
+    code: number = 100;
+
     @ApiProperty({ description: 'HTTP Status code', example: 200 })
     statusCode: number = 200;
 
@@ -12,9 +14,19 @@ export abstract class ApiBaseResponseDto {
 
 export abstract class ApiResponseDto<T> extends ApiBaseResponseDto {
     abstract data: T;
+
+    @ApiProperty({
+        description:
+            'Error details object (only details). `code` and `message` are returned at top-level.',
+        example: { detail: 'Validation failed' },
+        required: false,
+    })
+    errors?: any;
 }
 
-export abstract class ApiPaginatedResponseDto<T> extends ApiBaseResponseDto {
+export abstract class ApiPaginatedResponseDto<
+    T = null,
+> extends ApiBaseResponseDto {
     abstract data: T;
     abstract meta: PaginationMetaDto;
 }

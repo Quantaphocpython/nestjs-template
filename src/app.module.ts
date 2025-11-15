@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
+import { SentryModule } from '@sentry/nestjs/setup';
+import { AppExceptionFilter } from './filters/app-exception.filter';
 import { AppController } from './app.controller';
 import { appConfig } from './config/app';
 import { AuthModule } from './modules/auth/auth.module';
@@ -34,7 +35,7 @@ import { UsersModule } from './modules/users/users.module';
     providers: [
         {
             provide: APP_FILTER,
-            useClass: SentryGlobalFilter,
+            useClass: AppExceptionFilter,
         },
     ],
     controllers: [AppController],

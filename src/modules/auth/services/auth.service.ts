@@ -1,10 +1,6 @@
-import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { AppException } from 'src/exceptions/app-exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
@@ -62,7 +58,7 @@ export class AuthService {
         const user = await this.userService.findUserByEmail(email);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
         const isPasswordValid = await this.hashService.matchAsync(
@@ -71,7 +67,7 @@ export class AuthService {
         );
 
         if (!isPasswordValid) {
-            throw new NotFoundException('Invalid email or password');
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         const expiresIn = rememberMe
@@ -97,7 +93,7 @@ export class AuthService {
         const existingUser = await this.userService.findUserByEmail(email);
 
         if (existingUser) {
-            throw new ConflictException('User already exists with this email');
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
         const hashedPassword = await this.hashService.createHashAsync(password);
@@ -107,7 +103,7 @@ export class AuthService {
         });
 
         if (!createdUser?.id || !createdUser?.role) {
-            throw new BadRequestException('Failed to create user');
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         this.eventEmitter.emit(
@@ -166,7 +162,7 @@ export class AuthService {
         const hashedToken = await this.userAuthService.getRefreshToken(user.id);
 
         if (!hashedToken) {
-            throw new UnauthorizedException('Refresh token not found');
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         const isValid = await this.hashService.matchAsync(
@@ -175,7 +171,7 @@ export class AuthService {
         );
 
         if (!isValid) {
-            throw new UnauthorizedException('Invalid refresh token');
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         return this.generateTokens(user);
